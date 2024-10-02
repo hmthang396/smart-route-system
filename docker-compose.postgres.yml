@@ -1,0 +1,28 @@
+version: '3.5'
+
+services:
+    database:
+        image: postgres:latest
+        container_name: my_postgres
+        restart: always
+        networks:
+            - smart-route-system
+        environment:
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD}'
+            PGDATA: /data/postgres
+        ports:
+            - '5432:5432'
+        volumes:
+            - ./postgres:/data/postgres
+        env_file:
+            - .env
+
+volumes:
+    database:
+        driver: local
+
+networks:
+    smart-route-system:
+        external: true
