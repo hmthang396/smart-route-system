@@ -27,10 +27,9 @@ export class UserLoginDataRepository
   getEntityManager(): EntityManager {
     return this.userLoginDataRepository.manager;
   }
-  async createUserLoginData(
-    dto: Pick<UserLoginData, "email" | "passwordHash" | "userAccountId">,
-  ): Promise<UserLoginData> {
-    const entity = await this.userLoginDataRepository.save(dto);
+  async createUserLoginData(dto: Pick<UserLoginData, "email" | "passwordHash">): Promise<UserLoginData> {
+    const entity = await this.userLoginDataRepository.save(new UserLoginDataEntity({ ...dto }));
+
     return entity?.toModel();
   }
   async findByEmail(email: string): Promise<UserLoginData> {
@@ -43,13 +42,14 @@ export class UserLoginDataRepository
 
     return entity?.toModel();
   }
-  async updatePasswordRecoveryToken(email: string, token: string): Promise<boolean> {
+  async updatePasswordRecoveryToken(email: string, token: string, expiration: Date): Promise<boolean> {
     const result = await this.userLoginDataRepository.update(
       {
         email,
       },
       {
         passwordRecoveryToken: token,
+        recoveryTokenTime: expiration,
       },
     );
     return !!result.affected;
@@ -57,7 +57,8 @@ export class UserLoginDataRepository
   async updateUserLoginData(userLoginData: UserLoginData): Promise<boolean> {
     const result = await this.userLoginDataRepository.update(
       {
-        id: userLoginData.id,
+        // id: userLoginData.id,
+        userId: userLoginData.userId,
       },
       {
         passwordHash: userLoginData.passwordHash,

@@ -5,7 +5,7 @@ export class UserAccount {
   constructor(data?: Partial<UserAccount>) {
     Object.assign(this, { ...data });
   }
-  id: number;
+  userId: number;
   uuid: string;
   firstName: string;
   lastName: string;
@@ -13,10 +13,9 @@ export class UserAccount {
   dateOfBirth: Date;
   phoneNumber: string;
   avatar: string;
-  status: UserAccountStatus;
-  companyId?: number;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date;
   userLoginData: UserLoginData;
+  status: UserAccountStatus;
 }

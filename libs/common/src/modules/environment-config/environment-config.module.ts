@@ -20,6 +20,7 @@ export class EnvironmentConfigModule {
       ],
       providers: [EnvironmentConfigService],
       exports: [EnvironmentConfigService],
+      global: options.isGlobal,
     };
   }
 }

@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { AbstractRepository, DataSource, EntityManager, Repository } from "typeorm";
-import { UserAccountEntity, UserLoginDataEntity } from "../entities";
+import { UserAccountEntity } from "../entities";
 import { AsyncLocalStorage } from "async_hooks";
-import { UserAccount, UserLoginData, UserAccountStatus } from "@app/common";
+import { UserAccount, UserLoginData } from "@app/common";
 import { IUserAccountRepository } from "../../domain/repositories";
 
 @Injectable()
@@ -59,48 +59,60 @@ export class UserAccountRepository extends AbstractRepository<UserAccountEntity>
     return entity.toModel();
   }
 
-  async createUserAccountWithLoginData(dto: {
+  async createUserAccount(dto: {
     userLogin: Partial<UserLoginData>;
     userAccount: Partial<UserAccount>;
   }): Promise<UserAccount> {
     let userAccount = new UserAccount();
-    let userLoginData = new UserLoginData();
+    // let userLoginData = new UserLoginData();
 
-    await this.userAccountEntityRepository.manager.transaction(async (transactionalEntityManager) => {
-      const user = await this.findOneByEmail(dto.userLogin.email);
+    const user = await this.findOneByEmail(dto.userLogin.email);
 
-      if (!!user) {
-        throw new BadRequestException("Email is already in use");
-      }
-      const userAccountEntity = (await transactionalEntityManager.save(
-        new UserAccountEntity({ ...dto.userAccount, userLoginData: undefined }),
-      )) as UserAccountEntity;
+    if (!!user) {
+      throw new BadRequestException("Email is already in use");
+    }
 
-      dto.userLogin.userAccountId = userAccountEntity.id;
+    const userAccountEntity = await this.userAccountEntityRepository.save(
+      new UserAccountEntity({ ...dto.userAccount, userLoginData: undefined }),
+    );
 
-      const userLoginDataEntity = (await transactionalEntityManager.save(
-        new UserLoginDataEntity({ ...dto.userLogin }),
-      )) as UserLoginDataEntity;
+    userAccount = userAccountEntity.toModel();
 
-      userAccount = userAccountEntity.toModel();
-      userLoginData = userLoginDataEntity.toModel();
-    });
+    // await this.userAccountEntityRepository.manager.transaction(async (transactionalEntityManager) => {
+    //   const user = await this.findOneByEmail(dto.userLogin.email);
 
-    userAccount.userLoginData = userLoginData;
+    //   if (!!user) {
+    //     throw new BadRequestException("Email is already in use");
+    //   }
+    //   const userAccountEntity = (await transactionalEntityManager.save(
+    //     new UserAccountEntity({ ...dto.userAccount, userLoginData: undefined }),
+    //   )) as UserAccountEntity;
+
+    //   dto.userLogin.userAccountId = userAccountEntity.id;
+
+    //   const userLoginDataEntity = (await transactionalEntityManager.save(
+    //     new UserLoginDataEntity({ ...dto.userLogin }),
+    //   )) as UserLoginDataEntity;
+
+    //   userAccount = userAccountEntity.toModel();
+    //   userLoginData = userLoginDataEntity.toModel();
+    // });
+
+    // userAccount.userLoginData = userLoginData;
 
     return userAccount;
   }
 
-  async updateStatus(id: number, status: UserAccountStatus): Promise<boolean> {
-    const result = await this.userAccountEntityRepository.update(
-      {
-        id,
-      },
-      {
-        status,
-      },
-    );
+  // async updateStatus(id: number, status: UserAccountStatus): Promise<boolean> {
+  //   const result = await this.userAccountEntityRepository.update(
+  //     {
+  //       userId: id,
+  //     },
+  //     {
+  //       status,
+  //     },
+  //   );
 
-    return !!result.affected;
-  }
+  //   return !!result.affected;
+  // }
 }

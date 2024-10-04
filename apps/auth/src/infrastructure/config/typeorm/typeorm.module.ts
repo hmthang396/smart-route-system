@@ -2,16 +2,16 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { addTransactionalDataSource } from "../../local-storage/local-storage.module";
-import { DatabaseConfig, EnvironmentConfigModule, EnvironmentConfigService } from "@app/common";
+import { DatabaseConfig, EnvironmentConfigService } from "@app/common";
+import { UserAccountEntity, UserLoginDataEntity } from "../../entities";
 
 export const getTypeOrmModuleOptions = (config: DatabaseConfig): TypeOrmModuleOptions =>
   ({
     type: "postgres",
-    entities: ["apps/auth/src/infrastructure/entities/*.entity.ts"],
+    entities: ["dist/apps/auth/src/infrastructure/entities/*.entity.js"],
     logging: true,
     synchronize: false,
     migrationsRun: false,
-
     schema: config.getDatabaseSchema(),
     migrations: ["apps/auth/src/infrastructure/database/migrations/*.ts"],
     migrationsTableName: "migrations",
@@ -36,27 +36,20 @@ export const getTypeOrmModuleOptions = (config: DatabaseConfig): TypeOrmModuleOp
     },
     seeds: ["dist/database/seeds/**/*{.ts,.js}"],
     factories: ["dist/database/factories/**/*{.ts,.js}"],
-    autoLoadEntities: true,
+    autoLoadEntities: false,
   }) as TypeOrmModuleOptions;
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      imports: [
-        EnvironmentConfigModule.forRoot({
-          envFilePath: ["./apps/auth/.env"],
-          isGlobal: false,
-        }),
-      ],
+      imports: [],
       inject: [EnvironmentConfigService],
       useFactory: getTypeOrmModuleOptions,
       dataSourceFactory: async (options) => {
         return addTransactionalDataSource(new DataSource(options));
       },
     }),
-    TypeOrmModule.forFeature([
-      // ...
-    ]),
+    TypeOrmModule.forFeature([UserAccountEntity, UserLoginDataEntity]),
   ],
   exports: [TypeOrmModule],
 })
