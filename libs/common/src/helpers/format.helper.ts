@@ -1,5 +1,5 @@
 import * as moment from "moment";
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, ValidationError } from "@nestjs/common";
 import { FORMAT_DATE, FORMAT_DATETIME, FORMAT_TIME } from "../constants";
 
 export class FormatHelper {
@@ -55,6 +55,22 @@ export class FormatHelper {
       default:
         throw new BadRequestException(`Cannot convert string "${value}" to boolean.`);
     }
+  }
+
+  static exceptionFactory(errors: ValidationError[]) {
+    const formatError = (error: ValidationError) => {
+      if (error.children?.length) {
+        return {
+          field: error.property,
+          errors: error.children.map(formatError),
+        };
+      }
+      return {
+        field: error.property,
+        errors: Object.values(error.constraints ?? {}),
+      };
+    };
+    return new BadRequestException(errors.map((error) => formatError(error)));
   }
 
   static formatException(statusCode: number, path: string, error: any) {

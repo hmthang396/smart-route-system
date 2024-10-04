@@ -1,11 +1,14 @@
 export interface JWTConfig {
-  getJwtSecret(): string;
-  getJwtExpirationTime(): string;
-  getJwtRefreshSecret(): string;
-  getJwtRefreshExpirationTime(): string;
   getJwtType(): string;
-  getJwtPasswordExpirationTime(): string;
+  getJwtSecret(): string;
+  getJwtExpirationTime(): number;
+  getJwtRefreshSecret(): string;
+  getJwtRefreshExpirationTime(): number;
   getJwtPasswordSecret(): string;
+  getJwtPasswordExpirationTime(): number;
+  getJwtVerifySecret(): string;
+  getJwtVerifyExpirationTime(): number;
+  //
   getJwtRefreshCookieKey(): string;
   getJwtRefreshTokenCookieMaxAge(): string;
 }

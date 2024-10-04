@@ -3,7 +3,11 @@ import { LocalStorageModule } from "./infrastructure/local-storage/local-storage
 import { RepositoriesModule } from "./infrastructure/repositories/repositories.module";
 import { EnvironmentConfigModule, EnvironmentConfigService, ILogger, LoggerModule, LoggerService } from "@app/common";
 import { ConfigService } from "@nestjs/config";
-import { TypeOrmConfigModule } from "./infrastructure/config/typeorm/typeorm.module";
+import { ControllerModule } from "./presentation/controllers/controller.module";
+import { UnitOfWorkModule } from "./infrastructure/unit-of-work/unit-of-work.module";
+import { JwtTokenModule } from "./infrastructure/services/jwt-token/jwt.module";
+import { SubscriberModule } from "./infrastructure/subscribers/subcriber.module";
+import { PollerModule } from "./infrastructure/pollers/poller.module";
 
 @Module({
   imports: [
@@ -12,9 +16,13 @@ import { TypeOrmConfigModule } from "./infrastructure/config/typeorm/typeorm.mod
       envFilePath: ["./apps/auth/.env"],
       isGlobal: true,
     }),
-    TypeOrmConfigModule,
+    UnitOfWorkModule,
     LocalStorageModule,
     RepositoriesModule,
+    ControllerModule,
+    JwtTokenModule,
+    SubscriberModule,
+    PollerModule,
   ],
   controllers: [],
   providers: [EnvironmentConfigService],

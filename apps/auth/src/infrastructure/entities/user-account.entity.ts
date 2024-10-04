@@ -1,18 +1,18 @@
 import { Gender, UserAccount, UserAccountStatus } from "@app/common";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { UserLoginDataEntity } from "./user-login-data.entity";
 import { TimestampEntity } from "./timestamp.entity";
+import { RoleEntity } from "./role.entity";
 
 @Entity({ name: "user_account" })
 export class UserAccountEntity extends TimestampEntity implements UserAccount {
-  Constructor;
   constructor(userAccount: Partial<UserAccountEntity>) {
     super();
     Object.assign(this, userAccount);
   }
 
-  @PrimaryGeneratedColumn({ name: "id", type: "bigint" })
-  id: number;
+  @PrimaryGeneratedColumn({ name: "user_id", type: "bigint" })
+  userId: number;
 
   @Column({ name: "uuid", type: "uuid", generated: "uuid" })
   uuid: string;
@@ -79,16 +79,22 @@ export class UserAccountEntity extends TimestampEntity implements UserAccount {
   })
   status: UserAccountStatus;
 
-  // Relationship
-
+  // Relation to UserLoginData
   @OneToOne(() => UserLoginDataEntity, (userLoginData) => userLoginData.userAccount)
   userLoginData: UserLoginDataEntity;
 
-  // Convert to Model
+  // Many-to-many relation with Role
+  @ManyToMany(() => RoleEntity, {
+    nullable: false,
+    lazy: false,
+    cascade: false,
+  })
+  roles: RoleEntity[];
 
+  // Convert to Model
   toModel(): UserAccount {
     const model = new UserAccount();
-    model.id = this.id;
+    model.userId = this.userId;
     model.uuid = this.uuid;
     model.avatar = this.avatar;
     model.createdAt = this.createdAt;

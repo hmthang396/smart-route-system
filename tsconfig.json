@@ -53,7 +53,13 @@
       ],
       "@app/auth/presentation/*": [
         "apps/auth/src/presentation/*"
-      ]
+      ],
+			"@app/auth/common": [
+				"apps/auth/src/common"
+			],
+			"@app/auth/common/*": [
+				"apps/auth/src/common/*"
+			]
     }
   }
 }

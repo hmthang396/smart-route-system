@@ -1,4 +1,4 @@
-import { UserAccount, UserAccountStatus, UserLoginData } from "@app/common";
+import { UserAccount, UserLoginData } from "@app/common";
 
 export interface IUserAccountRepository {
   getEntityManager(): unknown;
@@ -7,10 +7,12 @@ export interface IUserAccountRepository {
 
   findOneByUUID(uuid: string): Promise<UserAccount | null>;
 
-  createUserAccountWithLoginData(dto: {
+  createUserAccount(dto: {
     userLogin: Partial<UserLoginData>;
     userAccount: Partial<UserAccount>;
   }): Promise<UserAccount>;
 
-  updateStatus(id: number, status: UserAccountStatus): Promise<boolean>;
+  markAsActive(uuid: string): Promise<void>;
+
+  findOneByConfirmationToken(token: string): Promise<UserAccount | null>;
 }

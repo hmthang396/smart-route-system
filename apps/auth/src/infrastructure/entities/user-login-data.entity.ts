@@ -11,14 +11,14 @@ export class UserLoginDataEntity extends TimestampEntity implements UserLoginDat
     Object.assign(this, userLoginData);
   }
 
-  @PrimaryGeneratedColumn({ name: "id", type: "bigint" })
-  id: number;
+  @PrimaryGeneratedColumn({ name: "user_id", type: "bigint" })
+  userId: number;
 
   @Column({ name: "uuid", type: "uuid", generated: "uuid" })
   uuid: string;
 
-  @Column({ name: "user_account_id", type: "bigint" })
-  userAccountId: number;
+  // @Column({ name: "user_account_id", type: "bigint" })
+  // userAccountId: number;
 
   @Column({
     name: "password_hash",
@@ -46,6 +46,23 @@ export class UserLoginDataEntity extends TimestampEntity implements UserLoginDat
   emailStatus: EmailStatus;
 
   @Column({
+    name: "confirmation_token",
+    type: "varchar",
+    length: 1024,
+    nullable: true,
+    default: null,
+  })
+  confirmationToken: string;
+
+  @Column({
+    name: "token_generation_time",
+    type: "timestamp",
+    default: null,
+    nullable: true,
+  })
+  tokenGenerationTime: Date;
+
+  @Column({
     name: "password_recovery_token",
     type: "varchar",
     length: 1024,
@@ -55,13 +72,12 @@ export class UserLoginDataEntity extends TimestampEntity implements UserLoginDat
   passwordRecoveryToken: string;
 
   @Column({
-    name: "confirmation_token",
-    type: "varchar",
-    length: 1024,
-    nullable: true,
+    name: "recovery_token_time",
+    type: "timestamp",
     default: null,
+    nullable: true,
   })
-  confirmationToken: string;
+  recoveryTokenTime: Date;
 
   @Column({
     name: "is_two_factor_enabled",
@@ -93,12 +109,12 @@ export class UserLoginDataEntity extends TimestampEntity implements UserLoginDat
     cascade: ["insert", "update"],
     eager: true,
   })
-  @JoinColumn({ name: "user_account_id" })
+  @JoinColumn({ name: "user_id" })
   userAccount: UserAccountEntity;
 
   public toModel(): UserLoginData {
     const model = new UserLoginData();
-    model.id = this.id;
+    model.userId = this.userId;
     model.confirmationToken = this.confirmationToken;
     model.createdAt = this.createdAt;
     model.updatedAt = this.updatedAt;
@@ -110,7 +126,6 @@ export class UserLoginDataEntity extends TimestampEntity implements UserLoginDat
     model.passwordHash = this.passwordHash;
     model.passwordRecoveryToken = this.passwordRecoveryToken;
     model.twoFactorSecret = this.twoFactorSecret;
-    model.userAccountId = this.userAccountId;
     model.uuid = this.uuid;
 
     return model;

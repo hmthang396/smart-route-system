@@ -4,17 +4,25 @@ export class UserLoginData {
   constructor(data?: Partial<UserLoginData>) {
     Object.assign(this, { ...data });
   }
-  id: number;
+
+  userId: number;
   uuid: string;
-  userAccountId: number;
+
   passwordHash: string;
+
   email: string;
   emailStatus: EmailStatus;
-  passwordRecoveryToken: string;
+
   confirmationToken: string;
+  tokenGenerationTime: Date;
+
+  passwordRecoveryToken: string;
+  recoveryTokenTime: Date;
+
   isTwoFactorEnabled: boolean;
   isTwoFactorVerified: boolean;
   twoFactorSecret: string;
+
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date;

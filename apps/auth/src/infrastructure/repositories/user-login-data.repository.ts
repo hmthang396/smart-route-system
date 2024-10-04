@@ -3,7 +3,7 @@ import { AsyncLocalStorage } from "async_hooks";
 import { AbstractRepository, DataSource, EntityManager, Repository } from "typeorm";
 import { UserLoginDataEntity } from "../entities";
 import { IUserLoginDataRepository } from "@app/auth/domain/repositories";
-import { UserLoginData } from "@app/common";
+import { EmailStatus, UserLoginData } from "@app/common";
 
 @Injectable()
 export class UserLoginDataRepository
@@ -17,6 +17,31 @@ export class UserLoginDataRepository
   ) {
     super();
   }
+  async updateConfirmationToken(uuid: string, token: string): Promise<boolean> {
+    const result = await this.userLoginDataRepository.update(
+      {
+        uuid,
+      },
+      {
+        confirmationToken: token,
+        tokenGenerationTime: new Date(),
+      },
+    );
+
+    return !!result.affected;
+  }
+  async markAsEmailConfirmed(uuid: string): Promise<void> {
+    await this.userLoginDataRepository.update(
+      {
+        uuid,
+      },
+      {
+        emailStatus: EmailStatus.CONFIRMED,
+        confirmationToken: null,
+      },
+    );
+  }
+
   get userLoginDataRepository(): Repository<UserLoginDataEntity> {
     const storage = this.localStorage.getStore();
     if (storage && storage.has("typeOrmEntityManager")) {
@@ -27,10 +52,9 @@ export class UserLoginDataRepository
   getEntityManager(): EntityManager {
     return this.userLoginDataRepository.manager;
   }
-  async createUserLoginData(
-    dto: Pick<UserLoginData, "email" | "passwordHash" | "userAccountId">,
-  ): Promise<UserLoginData> {
-    const entity = await this.userLoginDataRepository.save(dto);
+  async createUserLoginData(dto: Pick<UserLoginData, "email" | "passwordHash">): Promise<UserLoginData> {
+    const entity = await this.userLoginDataRepository.save(new UserLoginDataEntity({ ...dto }));
+
     return entity?.toModel();
   }
   async findByEmail(email: string): Promise<UserLoginData> {
@@ -43,13 +67,14 @@ export class UserLoginDataRepository
 
     return entity?.toModel();
   }
-  async updatePasswordRecoveryToken(email: string, token: string): Promise<boolean> {
+  async updatePasswordRecoveryToken(email: string, token: string, expiration: Date): Promise<boolean> {
     const result = await this.userLoginDataRepository.update(
       {
         email,
       },
       {
         passwordRecoveryToken: token,
+        recoveryTokenTime: expiration,
       },
     );
     return !!result.affected;
@@ -57,7 +82,8 @@ export class UserLoginDataRepository
   async updateUserLoginData(userLoginData: UserLoginData): Promise<boolean> {
     const result = await this.userLoginDataRepository.update(
       {
-        id: userLoginData.id,
+        // id: userLoginData.id,
+        userId: userLoginData.userId,
       },
       {
         passwordHash: userLoginData.passwordHash,
